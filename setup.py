@@ -193,12 +193,13 @@ def display(n, m, p, c, m1, m2):
 
 
 def generateSimplex(n, m, p, c):
-    s= [[0]*n]*m
+    s = [[0]* n for _ in range(m)]
     for x in range(n):
         for y in range(m):
             s[y][x]= trollOutcome(x+1, y+1, p, c)
-    return s
-s= generateSimplex(3, 3, 0, 3)
 
-print(trollOutcome(1,1,0,3))
+    return s
+s= generateSimplex(5, 4, -1, 5)
+print(s)
+
     
