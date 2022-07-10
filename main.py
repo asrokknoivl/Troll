@@ -1,7 +1,14 @@
+"""
+On n'est pas arrivé à tout faire mais voici ce que on a fait
+"""
 from setup import *
 
-num_of_cases= 15
-num_of_rocks= 50
-troll_pos= num_of_cases// 2
-env= Env(num_of_cases, num_of_rocks, troll_pos)
-env.simulateGame('random100', 'random100')
+def main():
+    m= generateMatrix(5, 4, -1, 5)
+    for row in m:   
+        print(row)
+    m= solveMatrix(m)
+    print("gain: ", trollOutcome(5, 4, -1, 5))
+    
+if __name__== '__main__':
+    main()

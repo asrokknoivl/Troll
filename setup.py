@@ -1,6 +1,6 @@
 import random
 import time
-
+from pulp import *
 class Env:
     def __init__(self, num_of_cases, num_of_rocks_1, num_of_rocks_2, troll_pos):
         self.troll= Troll(troll_pos)
@@ -121,7 +121,7 @@ class Castle:
 
 def trollOutcome(n, m, p, c):
     if isFinished(n, m, p, c):
-        return None
+        w= gameWinner(n, m, p, c)
     else:
         w= maxTroll(n, m, p, c)
     return w
@@ -160,14 +160,14 @@ def minTroll(n, m, p, c, last_move= None):
     return G
 
 def isFinished(n, m, p, c):
-    return n==0 or m==0 or p==c-1 or p==-1*(c-1)
+    return n==0 or m==0 or p==c//2 or p==-1*(c//2)
         
 
 def gameWinner(n, m, p, c):
     if isFinished(n, m, p, c):
-        if p == -1*(c-1):
+        if p == -1*(c//2):
             return -1
-        elif p == c-1:
+        elif p == c//2:
             return 1
         elif n== 0 :
             for i in range(m):
@@ -192,14 +192,37 @@ def display(n, m, p, c, m1, m2):
     print(gameWinner(n, m, p, c))
 
 
-def generateSimplex(n, m, p, c):
+def generateMatrix(n, m, p, c):
     s = [[0]* n for _ in range(m)]
-    for x in range(n):
-        for y in range(m):
-            s[y][x]= trollOutcome(x+1, y+1, p, c)
-
+    for x in range(1, n+1):
+        for y in range(1, m+1):
+            if x==y:
+                pp= p
+            elif x>y:
+                pp= p+1
+            else:
+                pp= p-1
+            s[y-1][x-1]= [(n-x, m-y, pp, c), trollOutcome(n-x, m-y, pp, c)]
     return s
-s= generateSimplex(5, 4, -1, 5)
-print(s)
 
-    
+
+def solveMatrix(s):
+    model= LpProblem('FurnitureProblem', LpMaximize)
+    a0= LpVariable("a0", 0, None, LpInteger)
+    a1= LpVariable("a1", 0, None, LpInteger)
+    a2= LpVariable("a2", 0, None, LpInteger)
+    a3= LpVariable("a3", 0, None, LpInteger)
+    a4= LpVariable("a4", 0, None, LpInteger)
+
+    print(s[0][0][1])
+    model+= s[0][0][1]* a0+ s[0][1][1]* a1+ s[0][2][1]* a2+ s[0][3][1]* a3+ s[0][4][1]* a4
+    model+= s[1][0][1]* a0+ s[1][1][1]* a1+ s[1][2][1]* a2+ s[1][3][1]* a3+ s[1][4][1]* a4
+    model+= s[2][0][1]* a0+ s[2][1][1]* a1+ s[2][2][1]* a2+ s[2][3][1]* a3+ s[2][4][1]* a4
+    model+= s[3][0][1]* a0+ s[3][1][1]* a1+ s[3][2][1]* a2+ s[3][3][1]* a3+ s[3][4][1]* a4
+
+    model+= a0+ a1+ a2+ a3+ a4 == 1
+    model.solve()    
+    #model.solve()
+    for v in model.variables():
+        print(v.name, '= ', v.varValue)
+
